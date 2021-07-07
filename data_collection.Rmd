@@ -1,0 +1,115 @@
+---
+title: "Google Trends Data"
+output: 
+  html_document:
+    df_print: paged
+---
+
+```{r}
+#devtools::install_github("PMassicotte/gtrendsR")
+library("curl")
+library("gtrendsR")
+```
+
+###Data Categories
+```{r}
+#An index of all available categories is available here
+data("categories")
+```
+
+```{r}
+#Get rid of the first row as we do not want the aggregated "All Categories"
+categories <- categories[-1,]
+```
+
+```{r}
+#Create empty data frame to store values
+df <- data.frame(date = as.Date(character()), hits = integer(), geo= character(), time = character(), gprop = character(), category = integer())
+
+#Get a vector with all id codes
+id <- as.matrix(as.numeric((categories[, -1])))
+
+id2 <- id[1]
+#Define vector with all countries of interest
+countries <- c("AR", "CL", "CO", "MX", "BR")
+```
+
+```{r}
+#Note: In order to obtain weekly query indeces, the maximum time interval is 5 years. Otherwise, a monthly index is provided
+get_all_categories <- function(country , category_id = id, date_range){
+    my_df <- data.frame(date = as.Date(character()), hits = integer(), geo= character(), time = character(), gprop = character(),   category = integer())
+
+  for(j in seq(1:length(category_id))){
+    df_temp <- gtrendsR::gtrends(geo = country, category = category_id[j], time = date_range)
+    df_temp <- df_temp$interest_over_time
+    
+    my_df <- rbind(my_df, df_temp)
+    Sys.sleep(3)
+
+  }
+  return(my_df)
+  }
+```
+
+
+```{r}
+
+### FIRST TIME PERIOD ###
+## 2017- 2019##
+
+arg_df_2015_2017 <- get_all_categories(country= "AR", date_range= "2015-01-01 2017-12-31")
+
+bra_df_2015_2017 <- get_all_categories(country= "BR", date_range= "2015-01-01 2017-12-31")
+
+col_df_2015_2017 <- get_all_categories(country= "CO", date_range= "2015-01-01 2017-12-31")
+
+chi_df_2015_2017 <- get_all_categories(country= "CL", date_range= "2015-01-01 2017-12-31")
+
+mex_df_2015_2017 <- get_all_categories(country= "MX", date_range= "2015-01-01 2017-12-31")
+
+### SECOND TIME PERIOD ###
+## 2017- 2019##
+
+arg_df_2017_2019 <- get_all_categories(country= "AR", date_range= "2017-01-01 2019-12-31")
+
+bra_df_2017_2019 <- get_all_categories(country= "BR", date_range= "2017-01-01 2019-12-31")
+
+col_df_2017_2019 <- get_all_categories(country= "CO", date_range= "2017-01-01 2019-12-31")
+
+chi_df_2017_2019 <- get_all_categories(country= "CL", date_range= "2017-01-01 2019-12-31")
+
+chi_df_2017_2019 <- get_all_categories(country= "CL", date_range= "2017-01-01 2019-12-31")
+
+mex_df_2017_2019 <- get_all_categories(country= "MX", date_range= "2017-01-01 2019-12-31")
+
+### THIRD TIME PERIOD ###
+## 2017- 2019##
+arg_df_2019_2021 <- get_all_categories(country= "AR", date_range= "2019-01-01 2021-05-31")
+bra_df_2019_2021 <- get_all_categories(country= "BR", date_range= "2019-01-01 2021-05-31")
+chi_df_2019_2021 <- get_all_categories(country= "CL", date_range= "2019-01-01 2021-05-31")
+
+col_df_2019_2021 <- get_all_categories(country= "CO", date_range= "2019-01-01 2021-05-31")
+
+mex_df_2019_2021 <- get_all_categories(country= "MX", date_range= "2019-01-01 2021-05-31")
+
+write.csv(arg_df_2015_2017,'arg_2015_2017.csv')
+write.csv(bra_df_2015_2017,'bra_2015_2017.csv')
+write.csv(col_df_2015_2017,'col_2015_2017.csv')
+write.csv(chi_df_2015_2017,'chi_2015_2017.csv')
+write.csv(mex_df_2015_2017,'mex_2015_2017.csv')
+write.csv(arg_df_2017_2019,'arg_2017_2019.csv')
+write.csv(col_df_2017_2019,'col_2017_2019.csv')
+write.csv(chi_df_2017_2019,'chi_2017_2019.csv')
+write.csv(mex_df_2017_2019,'mex_2017_2019.csv')
+write.csv(arg_df_2019_2021,'arg_2019_2021.csv')
+write.csv(bra_df_2019_2021,'bra_2019_2021.csv')
+write.csv(chi_df_2019_2021,'chi_2019_2021.csv')
+write.csv(col_df_2019_2021,'col_2019_2021.csv')
+write.csv(mex_df_2019_2021,'mex_2019_2021.csv')
+```
+
+```{r}
+rest<- gtrends( geo = "US", category= 3, time = "2017-12-10 2018-01-20")
+rest$interest_over_time
+```
+
