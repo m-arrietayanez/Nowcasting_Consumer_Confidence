@@ -84,13 +84,11 @@ process_cc <- function(country){
 
 ```{r}
 #Function to merge consumer confidence and google trends data 
-merge_and_label <- function(df_gt,df_cc, test_date){
+merge_and_label <- function(df_gt,df_cc){
   df_temp <- merge(df_gt, df_cc, by.x = "year_month", by.y = "date")
 
   df_temp <- df_temp %>%
     relocate(cc) %>%
-    mutate(train = ifelse(year_month < test_date, 1, 0)) %>%
-    relocate(train) %>%
     rename(date = year_month)
   
   #Remove year month variable
@@ -107,21 +105,26 @@ merge_and_label <- function(df_gt,df_cc, test_date){
 split_train_test <- function(df, initial_year){
   # list to store all data.frames
   out <- list()
+  
   #Put together training set and clean it
+  
+    if(initial_year == 2017){
+    train <-  df[1:33,]
+  } else{
+    train <-  df[1:26,]
+  }
+  
   train <- train %>% remove_rownames %>% column_to_rownames(var="date")
-  train <- train[,!(names(train) %in% c("train"))]
   out$train <- train
+  
   #Put together test set and clean it
-    if(initial_year == 2015 | initial_year == 2017){
+    if(initial_year == 2017){
     test <-  df[34:36,]
   } else{
     test <-  df[27:29,]
   }
   
   test <- test %>% remove_rownames %>% column_to_rownames(var="date")
-  test <- test[,!(names(test) %in% c("test"))]
-  test <- test %>% dplyr::select(-c("train"))
-
   out$test <- test
   
   return(out)
@@ -133,13 +136,14 @@ split_train_test <- function(df, initial_year){
 
 
 ```{r}
-bsts_run <- function(y, model_spec, seasons, iterations, df){
+bsts_run <- function(y, model_spec, seasons, iterations, df, seed = 42){
   ss <- AddLocalLinearTrend(list(), y)
   ss <- AddSeasonal(ss, y, nseasons = seasons)
   model <- bsts(model_spec,
                state.specification = ss,
                data = df,
-               niter = iterations)
+               niter = iterations, 
+               seed = seed)
   
   return(model)
   
@@ -199,8 +203,8 @@ test <- tibble::rownames_to_column(test_df, var = "Date" )
     
   }
 
-MAPE <- MAPE %>%
-   summarise(MAPE=mean(abs(Actual-Fitted)/abs(Actual)))
+#MAPE <- MAPE %>%
+   #summarise(MAPE=mean(abs(Actual-Fitted)/abs(Actual)))
 
 ### 95% forecast credible interval
 posterior.interval <- cbind.data.frame(
@@ -224,8 +228,11 @@ out$data_posterior <- d3
     
   }
 
+#Define y axis boundaries
+y_min <- min(d3$Actual, d3$Fitted, d3$LL) - 5
+y_max <- max(d3$Actual, d3$Fitted, d3$UL) + 5
 ### Plot actual versus predicted with credible intervals for the holdout period
-out$plot <- ggplot(data=d3, aes(x=Date)) +
+p <- ggplot(data=d3, aes(x=Date)) +
   geom_line(aes(y=Actual, colour = "Actual"), size=1.3) +
   geom_line(aes(y=Fitted, colour = "Fitted"), size=1.3, linetype=2) +
   scale_color_manual(values = c("#000000", custom_fill))+
@@ -237,6 +244,7 @@ out$plot <- ggplot(data=d3, aes(x=Date)) +
   labs(title = title, subtitle = paste(test_year-2, test_year, sep = "-"))+
   theme(axis.text.x=element_text(angle = -90, hjust = 0), legend.position="bottom")
 
+out$plot <- p + scale_y_continuous(limits = c(y_min, y_max))
 return(out)
 }
 ```
@@ -422,7 +430,7 @@ return(out)
 
 
 ```{r}
-bsts_run_w_prior <- function(y, model_spec, seasons, iterations, train_df, initial_year){
+bsts_run_w_prior <- function(y, model_spec, seasons, iterations, train_df, initial_year, seed= 42){
    #List the variable of interest depending on the period
   #Note that the only difference is that in the 2019-2021 period, I included two COVID related variables
    if(initial_year == 2017){
@@ -451,7 +459,8 @@ bsts_run_w_prior <- function(y, model_spec, seasons, iterations, train_df, initi
                state.specification = ss,
                data = train_df,
                prior=prior, 
-               niter = iterations)
+               niter = iterations, 
+               seed = seed)
   
   return(model)
   

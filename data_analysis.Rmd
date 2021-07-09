@@ -111,30 +111,30 @@ cc_mex <- process_cc("mexico")
 #MERGE CONSUMER CONFIDENCE DATA WITH GOOGLE TRENDS DATA
 
 #Argentina
-df_arg_2019 <- merge_and_label(df_gt = arg1, df_cc = cc_arg, test_date = "2019-10-01")
+df_arg_2019 <- merge_and_label(df_gt = arg1, df_cc = cc_arg)
 
-df_arg_2021 <- merge_and_label(arg2, cc_arg, "2021-03-01")
+df_arg_2021 <- merge_and_label(arg2, cc_arg)
 
 
 #Brasil
-df_bra_2019 <- merge_and_label(df_gt = bra1, df_cc = cc_bra, test_date = "2019-10-01")
+df_bra_2019 <- merge_and_label(df_gt = bra1, df_cc = cc_bra)
 
-df_bra_2021 <- merge_and_label(bra2, cc_bra, "2021-03-01")
+df_bra_2021 <- merge_and_label(bra2, cc_bra)
 
 #Chile
-df_chi_2019 <- merge_and_label(df_gt = chi1, df_cc = cc_chi, test_date = "2019-10-01")
+df_chi_2019 <- merge_and_label(df_gt = chi1, df_cc = cc_chi)
 
-df_chi_2021 <- merge_and_label(chi2, cc_chi, "2021-03-01")
+df_chi_2021 <- merge_and_label(chi2, cc_chi)
 
 #Colombia
-df_col_2019 <- merge_and_label(df_gt = col1, df_cc = cc_col, test_date = "2019-10-01")
+df_col_2019 <- merge_and_label(df_gt = col1, df_cc = cc_col)
 
-df_col_2021 <- merge_and_label(col2, cc_col, "2021-03-01")
+df_col_2021 <- merge_and_label(col2, cc_col)
 
 #Mexico
-df_mex_2019 <- merge_and_label(df_gt = mex1, df_cc = cc_mex, test_date = "2019-10-01")
+df_mex_2019 <- merge_and_label(df_gt = mex1, df_cc = cc_mex)
 
-df_mex_2021 <- merge_and_label(mex2, cc_mex, "2021-03-01")
+df_mex_2021 <- merge_and_label(mex2, cc_mex)
 ```
 
 #### Split Training and Test Sets
@@ -276,6 +276,10 @@ pred_wo_gt_arg_21 <- prediction_df_and_plot(model= model_wo_gt_arg_21,
 
 pred_wo_gt_arg_21$plot
 ```
+```{r}
+
+```
+
 
 ```{r}
 

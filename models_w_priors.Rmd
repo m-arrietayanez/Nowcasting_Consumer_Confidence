@@ -264,6 +264,7 @@ pred_w_priors_mex_2021$plot
 
 get_errors(MAPE_df = pred_w_priors_mex_2021$MAPE_raw, test_year = 2021, country = "mexico", reg = TRUE)
 ```
+
 ```{r}
 param_values_bsts(model_w_priors_mex_2019, tolerance_level = 0.001)
 
