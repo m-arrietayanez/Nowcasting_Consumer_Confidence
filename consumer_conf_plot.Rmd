@@ -1,0 +1,107 @@
+---
+title: "cc_stats"
+author: "Mariana Arrieta Yanez"
+date: "4/22/2021"
+output: html_document
+---
+
+```{r, message=FALSE}
+library(ggplot2)
+library(lubridate)
+library(tidyverse)
+library(TTR)
+```
+
+```{r}
+process_cc <- function(country){
+  df <- read.csv(paste(country, "cc.csv", sep = "/"))
+  df$newdate <- strptime(as.character(df$Date), "%d/%m/%Y")
+  df$newdate <- format(df$newdate, "%m/%Y")
+  df$cc <- gsub("\\,", ".", df$cc)
+
+  df <- df %>%
+   # filter(newdate > "2014-12-01") %>%
+    select(cc, newdate) %>%
+    relocate(newdate) %>%
+    rename(date= newdate) %>%
+    mutate(cc = as.numeric(cc)) %>%
+    mutate(date = my(date))
+  
+  df <- df %>%
+   filter(date > "2014-12-01")
+  
+  return(df)
+}
+```
+
+```{r}
+#Get the data 
+arg_cc <- process_cc("argentina")
+
+bra_cc <- process_cc("brasil")
+
+col_cc <- process_cc("colombia")
+
+chi_cc <- process_cc("chile")
+
+mex_cc <- process_cc("mexico")
+```
+
+```{r}
+#Plot consumer confidence 
+
+plot_cons_conf <- function(data_set, color, name){
+  if(name == "Argentina"){
+    ggplot(data_set, aes(x=date, y=cc)) + 
+  geom_line(col = "black") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %Y")+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+    annotate("rect", xmin=data_set[62,1], xmax=data_set[66,1], ymin=-Inf, ymax= Inf, alpha=0.2, fill="red") +
+    annotate("rect", xmin=data_set[40,1], xmax=data_set[52,1], ymin=-Inf, ymax= Inf, alpha=0.2, fill="blue") + 
+  labs(title = paste("Consumer Confidence in", name, sep = " "), subtitle = "2015-2021", x = "Date", y= "Consumer Confidence") 
+  }
+  else{
+  ggplot(data_set, aes(x=date, y=cc)) + 
+  geom_line(col = "black") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %Y")+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+    annotate("rect", xmin=data_set[62,1], xmax=data_set[66,1], ymin=-Inf, ymax= Inf, alpha=0.2, fill="red") +
+  labs(title = paste("Consumer Confidence in", name, sep = " "), subtitle = "2015-2021", x = "Date", y= "Consumer Confidence") 
+  }
+}
+```
+
+```{r}
+# Line plot Argentina
+plot_cons_conf(arg_cc, "#0C90EC", "Argentina")
+
+# Line plot Brasil
+plot_cons_conf(bra_cc, "#0C812C", "Brasil")
+
+#Line plot Colombia
+plot_cons_conf(col_cc, "#C2C208", "Colombia")
+
+#Line plot Chile
+plot_cons_conf(chi_cc, "#DC2610", "Chile")
+
+#Line plot Mexico
+plot_cons_conf(mex_cc, "#6C3029", "Mexico")
+```
+```{r}
+ggplot(bra_cc, aes(x=date, y=cc)) + 
+  geom_line() +
+  scale_x_date(date_breaks = "5 months", date_labels = "%b %y")+
+  theme_bw() +
+  labs(title = "Consumer Confidence in Argentina", subtitle = "2015-2021", x = "Date", y= "Consumer Confidence") 
+```
+```{r}
+arg_ts <- arg_cc %>%
+  select(-c(date))
+arg_ts <- ts(arg_ts, frequency = 12,  start=c(2015,1))
+
+arg_ts_components <- decompose(arg_ts)
+plot(arg_ts_components)
+```
+
